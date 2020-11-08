@@ -82,8 +82,6 @@ struct mctp_pktbuf {
 	unsigned char	data[];
 };
 
-struct mctp_binding;
-
 struct mctp_pktbuf *mctp_pktbuf_alloc(struct mctp_binding *hw, size_t len);
 void mctp_pktbuf_free(struct mctp_pktbuf *pkt);
 struct mctp_hdr *mctp_pktbuf_hdr(struct mctp_pktbuf *pkt);
@@ -138,6 +136,7 @@ struct mctp_device {
 bool mctp_device_equal(const struct mctp_device *a,
 		       const struct mctp_device *b);
 
+/* TODO: Store device UUIDs to handle Resolve UUID (DSP0236 v1.3.0 sec 12.18) */
 struct mctp_route {
 	struct mctp_eid_range range;
 	struct mctp_device device;
@@ -171,6 +170,8 @@ struct mctp_route {
 #define MCTP_ROUTE_TYPE_LOCAL	   3
 	uint8_t type;
 
+	/* TODO: Add flags for DSP0236 v1.3.0 sec 9.2.4 */
+	/* XXX: Infer entry type from dynamic pool (DSP0236 v1.3.0 sec 12.12) */
 #define MCTP_ROUTE_FLAG_PROVISIONAL (1 << 0)
 	uint32_t flags;
 };

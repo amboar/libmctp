@@ -8,6 +8,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+/* TODO: Store Physical Transport Binding Identifier (DSP0239) */
+/* TODO: Store Physical Media Type Identifier (DSP0239) */
+/*
+ * TODO: Generate a map of ((Physical Transport Binding Identifier, Physical
+ * Media Type Identifier), Physical Address Size)
+ */
+/* TODO: Advertise whether endpoint discovery is necessary */
 struct mctp_binding {
 	const char *name;
 	uint8_t version;

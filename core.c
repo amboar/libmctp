@@ -1325,8 +1325,36 @@ static void mctp_rx(struct mctp *mctp, struct mctp_bus *bus, mctp_eid_t src,
 			return;
 	}
 
-	if (mctp->message_rx)
+	if (mctp->message_rx) {
+		/*
+		 * FIXME: For non-transport MCTP control request messages we
+		 * need to track the bus the message came in on in order to
+		 * route the response back out the same bus. We can achieve an
+		 * ambiguous configuration with a bus-owner and a device where
+		 * both are bridges with multiple links connecting eachother,
+		 * and both are configured to use a single EID for their
+		 * bridge:
+		 *
+		 * +--------------------+                +-----------------+
+		 * |           +-----+  |     PCIe       |  +-----+        |
+		 * |           |     +----------------------+     +------------
+		 * | Top Level |  8  |  |                |  |  9  | Bridge |
+		 * | Bus Owner |     |  |                |  |     | Device |
+		 * |           |     +----------------------+     |        |
+		 * |           +-----+  |     SMBus      |  +-----+        |
+		 * +--------------------+                +-----------------+
+		 *
+		 * TODO: Expose the terminus information to the client
+		 *
+		 * XXX: We may need to expose a mapping between active MCTP
+		 * message termini and the bus through which packets destined
+		 * for the terminus were routed to satisfy requirements in
+		 * DSP0236 v1.3.0 section 9.3.
+		 *
+		 * Reference: DSP0236 v1.3.0 sections 9.2.4 and 9.3.
+		 */
 		mctp->message_rx(src, mctp->message_rx_data, buf, len);
+	}
 }
 
 static void mctp_packet_tx_enqueue(struct mctp_bus *bus,
@@ -1450,7 +1478,7 @@ static void mctp_binding_route(struct mctp_binding *binding,
 
 	mctp_packet_tx_enqueue(bus, framed);
 
-	/* pkt is freed once it has been sent */
+	/* tx_pkt is freed once it has been sent */
 	mctp_send_tx_queue(bus);
 
 out:
@@ -1594,6 +1622,7 @@ void mctp_binding_rx(struct mctp_binding *binding,
 	match = mctp_route_get_by_eid(mctp, dest);
 	if (!match) {
 		/* If we can't route the packet in any way then drop it */
+		/* TODO: Add debug log about dropping the packet */
 		mctp_pktbuf_free(pkt);
 		return;
 	}
