@@ -801,29 +801,37 @@ static void test_mctp_route_get_by_device_overlap(void)
 	mctp_destroy(mctp);
 }
 
+static void (*route_tests[])(void) = {
+	test_mctp_route_table_add_one,
+	test_mctp_route_table_add_two,
+	test_mctp_route_table_add_eid_conflict,
+	test_mctp_route_table_add_bus_addr_conflict,
+	test_mctp_route_table_remove_only,
+	test_mctp_route_table_remove_first,
+	test_mctp_route_table_remove_last,
+	test_mctp_route_table_remove_middle,
+	test_mctp_route_table_insert_two_disjoint,
+	test_mctp_route_table_insert_delete_intersect,
+	test_mctp_route_table_add_notify,
+	test_mctp_route_table_remove_notify,
+	test_mctp_route_table_allocate_one,
+	test_mctp_route_table_allocate_invalid,
+	test_mctp_route_table_allocate_one_provisional,
+	test_mctp_route_query_provisional_one,
+	test_mctp_route_respond_provisional_one,
+	test_mctp_route_table_allocate_provisional_overlap,
+	test_mctp_route_get_by_device_overlap,
+	NULL,
+};
+
 int main(void)
 {
+	void (**fn)(void);
+
 	mctp_set_log_stdio(MCTP_LOG_DEBUG);
 
-	test_mctp_route_table_add_one();
-	test_mctp_route_table_add_two();
-	test_mctp_route_table_add_eid_conflict();
-	test_mctp_route_table_add_bus_addr_conflict();
-	test_mctp_route_table_remove_only();
-	test_mctp_route_table_remove_first();
-	test_mctp_route_table_remove_last();
-	test_mctp_route_table_remove_middle();
-	test_mctp_route_table_insert_two_disjoint();
-	test_mctp_route_table_insert_delete_intersect();
-	test_mctp_route_table_add_notify();
-	test_mctp_route_table_remove_notify();
-	test_mctp_route_table_allocate_one();
-	test_mctp_route_table_allocate_invalid();
-	test_mctp_route_table_allocate_one_provisional();
-	test_mctp_route_query_provisional_one();
-	test_mctp_route_respond_provisional_one();
-	test_mctp_route_table_allocate_provisional_overlap();
-	test_mctp_route_get_by_device_overlap();
+	for (fn = route_tests; *fn; fn++)
+		(*fn)();
 
 	return 0;
 }
